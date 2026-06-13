@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>探索你的性格密码 | 全维性格分析</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+:root {
+  --bg-primary: #0a0a1a;
+  --bg-secondary: #12122a;
+  --bg-card: rgba(255,255,255,0.04);
+  --accent-purple: #8b5cf6;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899;
+  --accent-orange: #f59e0b;
+  --accent-green: #10b981;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --gradient-1: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  --gradient-2: linear-gradient(135deg, #ec4899, #8b5cf6);
+  --gradient-3: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --gradient-4: linear-gradient(135deg, #f59e0b, #ec4899);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated background */
+.bg-animation {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+}
+.bg-orb {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15;
+  animation: orbFloat 20s ease-in-out infinite;
+}
+.bg-orb:nth-child(1) { width:600px;height:600px;background:#8b5cf6;top:-200px;left:-100px;animation-delay:0s; }
+.bg-orb:nth-child(2) { width:500px;height:500px;background:#3b82f6;top:50%;right:-150px;animation-delay:-7s; }
+.bg-orb:nth-child(3) { width:400px;height:400px;background:#ec4899;bottom:-100px;left:30%;animation-delay:-14s; }
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-30px) scale(1.05); }
+  66% { transform: translate(-20px,20px) scale(0.95); }
+}
+
+.container { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:20px; }
+
+/* Page transitions */
+.page { display:none; animation: fadeIn 0.6s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* Landing Page */
+.landing-hero { text-align:center; padding:80px 20px 40px; }
+.landing-icon { font-size:80px; margin-bottom:20px; animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+.landing-title {
+  font-size: clamp(2rem, 5vw, 3.5rem); font-weight:900;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899, #f59e0b);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; line-height:1.3; margin-bottom:16px;
+}
+.landing-subtitle { color:var(--text-secondary); font-size:1.1rem; line-height:1.8; max-width:600px; margin:0 auto 40px; }
+
+.feature-grid {
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap:16px; margin-bottom:40px;
+}
+.feature-card {
+  background: var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px; padding:24px; text-align:center;
+  transition: all 0.3s ease; cursor:default;
+}
+.feature-card:hover { border-color: rgba(139,92,246,0.3); transform:translateY(-4px); }
+.feature-card .icon { font-size:36px; margin-bottom:12px; }
+.feature-card h3 { font-size:1rem; margin-bottom:6px; font-weight:600; }
+.feature-card p { font-size:0.82rem; color:var(--text-secondary); line-height:1.5; }
+
+.btn-primary {
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--gradient-1); color:#fff; border:none;
+  padding:16px 48px; border-radius:50px; font-size:1.1rem;
+  font-weight:600; cursor:pointer; transition:all 0.3s ease;
+  font-family:inherit; box-shadow: 0 4px 24px rgba(139,92,246,0.3);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(139,92,246,0.4); }
+
+/* Quiz Page */
+.quiz-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 0; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.quiz-progress-text { font-size:0.9rem; color:var(--text-secondary); }
+.quiz-progress-bar { flex:1; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; margin:0 16px; overflow:hidden; }
+.quiz-progress-fill { height:100%; background:var(--gradient-1); border-radius:3px; transition:width 0.5s ease; }
+
+.quiz-section-title {
+  font-size:1.3rem; font-weight:700; margin:30px 0 20px;
+  display:flex; align-items:center; gap:10px;
+}
+.quiz-section-title .dot { width:8px;height:8px;border-radius:50%; }
+
+.question-card {
+  background: var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px; padding:24px; margin-bottom:16px;
+  transition: all 0.3s ease;
+}
+.question-card:hover { border-color: rgba(139,92,246,0.15); }
+.question-text { font-size:1rem; font-weight:500; margin-bottom:16px; line-height:1.6; }
+
+.option-group { display:flex; flex-direction:column; gap:8px; }
+.option-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px; border-radius:12px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.06); transition:all 0.2s ease;
+  font-size:0.92rem; color:var(--text-secondary);
+}
+.option-item:hover { border-color:rgba(139,92,246,0.3); background:rgba(139,92,246,0.05); }
+.option-item.selected { border-color:var(--accent-purple); background:rgba(139,92,246,0.1); color:var(--text-primary); }
+
+.option-radio {
+  width:20px;height:20px;border-radius:50%;border:2px solid var(--text-muted);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all 0.2s ease;
+}
+.option-item.selected .option-radio { border-color:var(--accent-purple); }
+.option-item.selected .option-radio::after {
+  content:''; width:10px;height:10px;border-radius:50%;background:var(--accent-purple);
+}
+
+.slider-group { padding:8px 0; }
+.slider-label { display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.85rem; color:var(--text-secondary); }
+.slider-track { width:100%; -webkit-appearance:none; appearance:none; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; }
+.slider-track::-webkit-slider-thumb {
+  -webkit-appearance:none; width:22px;height:22px;border-radius:50%;
+  background:var(--accent-purple); cursor:pointer; box-shadow:0 2px 8px rgba(139,92,246,0.4);
+}
+
+.btn-submit {
+  display:block; width:100%; padding:16px; background:var(--gradient-1);
+  color:#fff; border:none; border-radius:12px; font-size:1.05rem;
+  font-weight:600; cursor:pointer; transition:all 0.3s ease;
+  font-family:inherit; margin-top:30px;
+}
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,92,246,0.3); }
+.btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* Result Page */
+.result-hero { text-align:center; padding:40px 0 30px; }
+.result-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:120px; height:120px; border-radius:50%; font-size:48px;
+  margin-bottom:20px; position:relative;
+}
+.result-badge::after {
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  background: conic-gradient(var(--accent-purple), var(--accent-pink), var(--accent-orange), var(--accent-purple));
+  z-index:-1; animation: spin 8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.result-type { font-size:clamp(2.5rem,6vw,4rem); font-weight:900; letter-spacing:2px; margin-bottom:8px; }
+.result-title { font-size:1.3rem; color:var(--accent-cyan); font-weight:600; margin-bottom:12px; }
+.result-desc { color:var(--text-secondary); line-height:1.8; max-width:600px; margin:0 auto; }
+
+/* MBTI Dimensions */
+.dimension-section { margin:30px 0; }
+.section-title {
+  font-size:1.2rem; font-weight:700; margin-bottom:20px;
+  display:flex; align-items:center; gap:8px;
+}
+.dimension-bar-group { display:flex; flex-direction:column; gap:20px; }
+.dimension-item {
+  background: var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px; padding:20px;
+}
+.dim-labels { display:flex; justify-content:space-between; margin-bottom:10px; }
+.dim-label { font-size:0.85rem; font-weight:600; }
+.dim-label.active { color:var(--accent-cyan); }
+.dim-bar { height:10px; background:rgba(255,255,255,0.06); border-radius:5px; position:relative; overflow:hidden; }
+.dim-fill { height:100%; border-radius:5px; transition:width 1.5s ease; }
+.dim-percentage { text-align:center; margin-top:8px; font-size:0.85rem; color:var(--text-secondary); }
+.dim-desc { margin-top:8px; font-size:0.82rem; color:var(--text-muted); line-height:1.5; text-align:center; }
+
+/* Radar Chart */
+.radar-container { text-align:center; margin:30px 0; }
+.radar-container canvas { max-width:100%; }
+
+/* Big Five */
+.big5-card {
+  background: var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px; padding:20px; margin-bottom:12px;
+}
+.big5-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.big5-name { font-weight:600; font-size:0.95rem; }
+.big5-score { font-weight:700; font-size:1.1rem; }
+.big5-bar { height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; }
+.big5-fill { height:100%; border-radius:4px; transition:width 1.5s ease; }
+.big5-traits { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.big5-trait {
+  font-size:0.75rem; padding:3px 10px; border-radius:20px;
+  background:rgba(255,255,255,0.05); color:var(--text-secondary);
+}
+
+/* Social Energy */
+.social-gauge { text-align:center; margin:20px 0; }
+.gauge-container { position:relative; width:220px; height:130px; margin:0 auto; }
+.gauge-bg, .gauge-fill { position:absolute; bottom:0; }
+.gauge-label { font-size:2rem; font-weight:900; margin-top:10px; }
+.gauge-desc { color:var(--text-secondary); font-size:0.9rem; margin-top:4px; }
+
+/* Career & Tips */
+.career-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin:15px 0; }
+.career-item {
+  background:var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px; padding:14px; text-align:center; font-size:0.85rem;
+}
+.career-item .emoji { font-size:24px; display:block; margin-bottom:6px; }
+
+.tip-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1));
+  border:1px solid rgba(139,92,246,0.15); border-radius:16px;
+  padding:20px; margin:12px 0; line-height:1.7;
+}
+.tip-card strong { color:var(--accent-cyan); }
+
+/* Compatibility */
+.compat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:15px 0; }
+.compat-card {
+  background:var(--bg-card); border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px; padding:16px; text-align:center;
+}
+.compat-type { font-size:1.3rem; font-weight:900; margin-bottom:4px; }
+.compat-label { font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; }
+.compat-hearts { font-size:1rem; }
+
+.btn-restart {
+  display:block; margin:30px auto; padding:12px 32px;
+  background:transparent; border:1px solid rgba(255,255,255,0.15);
+  color:var(--text-secondary); border-radius:50px; font-size:0.9rem;
+  cursor:pointer; transition:all 0.3s ease; font-family:inherit;
+}
+.btn-restart:hover { border-color:var(--accent-purple); color:var(--text-primary); }
+
+/* Responsive */
+@media(max-width:600px) {
+  .container { padding:12px; }
+  .landing-hero { padding:50px 12px 30px; }
+  .feature-grid { grid-template-columns:1fr 1fr; }
+  .question-card { padding:18px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="bg-animation">
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+</div>
+
+<!-- PAGE 1: Landing -->
+<div class="container">
+<div id="landing" class="page active">
+  <div class="landing-hero">
+    <div class="landing-icon">🧠</div>
+    <h1 class="landing-title">探索你的性格密码</h1>
+    <p class="landing-subtitle">
+      深入解析你的 MBTI 人格类型、大五人格特质、社交能量模式，<br>
+      发现你独特的思维方式和行为偏好
+    </p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">🎯</div>
+        <h3>MBTI 16型</h3>
+        <p>4个核心维度的精准定位</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📊</div>
+        <h3>大五人格</h3>
+        <p>科学界认可度最高的特质模型</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <h3>社交能量</h3>
+        <p>I/E 光谱上的精确位置</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💡</div>
+        <h3>成长建议</h3>
+        <p>基于类型的发展方向</p>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">
+      开始测试 ✨
+    </button>
+    <p style="margin-top:16px;color:var(--text-muted);font-size:0.82rem;">约 5 分钟 · 28 道题 · 即时出结果</p>
+  </div>
+</div>
+
+<!-- PAGE 2: Quiz -->
+<div id="quiz" class="page">
+  <div class="quiz-header">
+    <span class="quiz-progress-text" id="progressText">1 / 28</span>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:3.5%"></div></div>
+    <span style="font-size:0.82rem;color:var(--text-muted)">5 min</span>
+  </div>
+
+  <!-- Section 1: E/I -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-cyan)"></span>社交能量维度</div>
+
+  <div class="question-card" data-q="1">
+    <div class="question-text">周末到了，你最想做的事是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,1,'A')"><div class="option-radio"></div>约上朋友出去嗨，越热闹越好</div>
+      <div class="option-item" onclick="selectOption(this,1,'B')"><div class="option-radio"></div>在家看剧打游戏，独处最舒服</div>
+      <div class="option-item" onclick="selectOption(this,1,'C')"><div class="option-radio"></div>先一个人待着，晚上再约朋友小聚</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="2">
+    <div class="question-text">在一个陌生的社交场合，你通常会？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,2,'A')"><div class="option-radio"></div>主动找人聊天，乐在其中</div>
+      <div class="option-item" onclick="selectOption(this,2,'B')"><div class="option-radio"></div>找到角落待着，等别人来搭话</div>
+      <div class="option-item" onclick="selectOption(this,2,'C')"><div class="option-radio"></div>观察一会儿再决定要不要社交</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="3">
+    <div class="question-text">长时间社交后，你的感受是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,3,'A')"><div class="option-radio"></div>越聊越嗨，还想继续</div>
+      <div class="option-item" onclick="selectOption(this,3,'B')"><div class="option-radio"></div>急需独处充电，社交电池耗尽</div>
+      <div class="option-item" onclick="selectOption(this,3,'C')"><div class="option-radio"></div>看情况，有时充实有时疲惫</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="4">
+    <div class="question-text">你更喜欢哪种工作方式？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,4,'A')"><div class="option-radio"></div>团队头脑风暴，思想碰撞</div>
+      <div class="option-item" onclick="selectOption(this,4,'B')"><div class="option-radio"></div>独立安静地深度思考</div>
+      <div class="option-item" onclick="selectOption(this,4,'C')"><div class="option-radio"></div>先独立思考，再团队讨论</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="5">
+    <div class="question-text">你的朋友圈规模通常是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,5,'A')"><div class="option-radio"></div>很广，各种圈子都有朋友</div>
+      <div class="option-item" onclick="selectOption(this,5,'B')"><div class="option-radio"></div>很小，但每个都很深交</div>
+      <div class="option-item" onclick="selectOption(this,5,'C')"><div class="option-radio"></div>中等，几个亲密朋友加一些泛泛之交</div>
+    </div>
+  </div>
+
+  <!-- Section 2: S/N -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-purple)"></span>认知方式维度</div>
+
+  <div class="question-card" data-q="6">
+    <div class="question-text">学习新东西时，你更倾向于？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,6,'A')"><div class="option-radio"></div>先看实例和具体操作步骤</div>
+      <div class="option-item" onclick="selectOption(this,6,'B')"><div class="option-radio"></div>先理解底层原理和理论框架</div>
+      <div class="option-item" onclick="selectOption(this,6,'C')"><div class="option-radio"></div>两者结合，理论加实践</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="7">
+    <div class="question-text">描述一件事情时，你更习惯？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,7,'A')"><div class="option-radio"></div>按时间线详细叙述经过</div>
+      <div class="option-item" onclick="selectOption(this,7,'B')"><div class="option-radio"></div>抓住核心要点，概括性描述</div>
+      <div class="option-item" onclick="selectOption(this,7,'C')"><div class="option-radio"></div>用比喻和联想来解释</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="8">
+    <div class="question-text">你对未来的态度更接近？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,8,'A')"><div class="option-radio"></div>脚踏实地，做好眼前的每一步</div>
+      <div class="option-item" onclick="selectOption(this,8,'B')"><div class="option-radio"></div>畅想各种可能性，规划远景</div>
+      <div class="option-item" onclick="selectOption(this,8,'C')"><div class="option-radio"></div>短期务实，长期有愿景</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="9">
+    <div class="question-text">解决问题时，你更依赖？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,9,'A')"><div class="option-radio"></div>过往经验和已验证的方法</div>
+      <div class="option-item" onclick="selectOption(this,9,'B')"><div class="option-radio"></div>直觉和灵感，尝试新思路</div>
+      <div class="option-item" onclick="selectOption(this,9,'C')"><div class="option-radio"></div>两者各半，具体情况具体分析</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="10">
+    <div class="question-text">阅读一本书时，你更喜欢？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,10,'A')"><div class="option-radio"></div>实用指南类，能直接用上的</div>
+      <div class="option-item" onclick="selectOption(this,10,'B')"><div class="option-radio"></div>科幻或哲学类，启发思考的</div>
+      <div class="option-item" onclick="selectOption(this,10,'C')"><div class="option-radio"></div>都看，看心情选择</div>
+    </div>
+  </div>
+
+  <!-- Section 3: T/F -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-pink)"></span>决策风格维度</div>
+
+  <div class="question-card" data-q="11">
+    <div class="question-text">做一个重要决定时，你更看重？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,11,'A')"><div class="option-radio"></div>客观数据和逻辑分析</div>
+      <div class="option-item" onclick="selectOption(this,11,'B')"><div class="option-radio"></div>内心感受和价值观</div>
+      <div class="option-item" onclick="selectOption(this,11,'C')"><div class="option-radio"></div>两者兼顾，理性加感性</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="12">
+    <div class="question-text">朋友跟你诉苦时，你的第一反应是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,12,'A')"><div class="option-radio"></div>帮忙分析问题，给出解决方案</div>
+      <div class="option-item" onclick="selectOption(this,12,'B')"><div class="option-radio"></div>先共情安慰，让对方感受到支持</div>
+      <div class="option-item" onclick="selectOption(this,12,'C')"><div class="option-radio"></div>看情况，有时分析有时安慰</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="13">
+    <div class="question-text">面对批评时，你更在意？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,13,'A')"><div class="option-radio"></div>批评是否合理、有没有道理</div>
+      <div class="option-item" onclick="selectOption(this,13,'B')"><div class="option-radio"></div>对方的态度和表达方式</div>
+      <div class="option-item" onclick="selectOption(this,13,'C')"><div class="option-radio"></div>两者都看，内容和态度同等重要</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="14">
+    <div class="question-text">团队中出现分歧，你会？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,14,'A')"><div class="option-radio"></div>摆事实讲道理，找最优解</div>
+      <div class="option-item" onclick="selectOption(this,14,'B')"><div class="option-radio"></div>关注每个人感受，求共识</div>
+      <div class="option-item" onclick="selectOption(this,14,'C')"><div class="option-radio"></div>平衡逻辑和感受，找折中方案</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="15">
+    <div class="question-text">你更佩服哪种人？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,15,'A')"><div class="option-radio"></div>冷静客观、分析力强的人</div>
+      <div class="option-item" onclick="selectOption(this,15,'B')"><div class="option-radio"></div>温暖善良、善解人意的人</div>
+      <div class="option-item" onclick="selectOption(this,15,'C')"><div class="option-radio"></div>兼具理性与共情的人</div>
+    </div>
+  </div>
+
+  <!-- Section 4: J/P -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-orange)"></span>生活风格维度</div>
+
+  <div class="question-card" data-q="16">
+    <div class="question-text">出门旅行，你的准备方式是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,16,'A')"><div class="option-radio"></div>提前做好详细攻略和行程表</div>
+      <div class="option-item" onclick="selectOption(this,16,'B')"><div class="option-radio"></div>随性出发，到了再说</div>
+      <div class="option-item" onclick="selectOption(this,16,'C')"><div class="option-radio"></div>大致规划框架，留些弹性空间</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="17">
+    <div class="question-text">你的桌面/房间状态通常是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,17,'A')"><div class="option-radio"></div>整整齐齐，东西都有固定位置</div>
+      <div class="option-item" onclick="selectOption(this,17,'B')"><div class="option-radio"></div>看似混乱但我能找到东西</div>
+      <div class="option-item" onclick="selectOption(this,17,'C')"><div class="option-radio"></div>阶段性整理，时乱时齐</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="18">
+    <div class="question-text">面对截止日期，你通常？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,18,'A')"><div class="option-radio"></div>提前完成，不喜欢最后一刻赶工</div>
+      <div class="option-item" onclick="selectOption(this,18,'B')"><div class="option-radio"></div>截止前爆发效率，deadline 是第一生产力</div>
+      <div class="option-item" onclick="selectOption(this,18,'C')"><div class="option-radio"></div>根据任务难度灵活安排</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="19">
+    <div class="question-text">计划突然被打乱，你的反应是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,19,'A')"><div class="option-radio"></div>有些焦虑，想尽快重新规划</div>
+      <div class="option-item" onclick="selectOption(this,19,'B')"><div class="option-radio"></div>无所谓，变化才有意思</div>
+      <div class="option-item" onclick="selectOption(this,19,'C')"><div class="option-radio"></div>有点不爽但能适应</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="20">
+    <div class="question-text">你对"规则"的态度是？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,20,'A')"><div class="option-radio"></div>规则让生活更有序，应该遵守</div>
+      <div class="option-item" onclick="selectOption(this,20,'B')"><div class="option-radio"></div>规则是用来突破的，灵活变通</div>
+      <div class="option-item" onclick="selectOption(this,20,'C')"><div class="option-radio"></div>有用的规则遵守，不合理的质疑</div>
+    </div>
+  </div>
+
+  <!-- Section 5: Big Five -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-green)"></span>深层特质评估</div>
+
+  <div class="question-card" data-q="21">
+    <div class="question-text">遇到新环境或新挑战，你的第一反应？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,21,'A')"><div class="option-radio"></div>兴奋期待，跃跃欲试</div>
+      <div class="option-item" onclick="selectOption(this,21,'B')"><div class="option-radio"></div>谨慎观望，先了解再行动</div>
+      <div class="option-item" onclick="selectOption(this,21,'C')"><div class="option-radio"></div>看心情，有时冲有时稳</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="22">
+    <div class="question-text">你容易被情绪影响吗？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,22,'A')"><div class="option-radio"></div>比较敏感，情绪起伏明显</div>
+      <div class="option-item" onclick="selectOption(this,22,'B')"><div class="option-radio"></div>比较稳定，不太受情绪左右</div>
+      <div class="option-item" onclick="selectOption(this,22,'C')"><div class="option-radio"></div>看情况，大事敏感小事稳定</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="23">
+    <div class="question-text">你对"合作"的看法？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,23,'A')"><div class="option-radio"></div>喜欢与人协作，1+1>2</div>
+      <div class="option-item" onclick="selectOption(this,23,'B')"><div class="option-radio"></div>更信任自己，独立完成更放心</div>
+      <div class="option-item" onclick="selectOption(this,23,'C')"><div class="option-radio"></div>因任务而异，灵活选择</div>
+    </div>
+  </div>
+
+  <div class="question-card" data-q="24">
+    <div class="question-text">你更关注事物的？</div>
+    <div class="option-group">
+      <div class="option-item" onclick="selectOption(this,24,'A')"><div class="option-radio"></div>细节和具体实现</div>
+      <div class="option-item" onclick="selectOption(this,24,'B')"><div class="option-radio"></div>大局和整体方向</div>
+      <div class="option-item" onclick="selectOption(this,24,'C')"><div class="option-radio"></div>在不同层面间切换</div>
+    </div>
+  </div>
+
+  <!-- Section 6: Social Energy Sliders -->
+  <div class="quiz-section-title"><span class="dot" style="background:var(--accent-blue)"></span>社交能量精细调节</div>
+
+  <div class="question-card">
+    <div class="question-text">独处时你感到？</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>极度疲惫 😫</span><span>极度充实 😌</span></div>
+      <input type="range" class="slider-track" id="slider1" min="0" max="100" value="50" oninput="updateSlider(1)">
+      <div style="text-align:center;margin-top:4px;font-size:0.82rem;color:var(--accent-cyan)" id="sliderVal1">50</div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text">社交活动让你感到？</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>消耗能量 🔋</span><span>获得能量 ⚡</span></div>
+      <input type="range" class="slider-track" id="slider2" min="0" max="100" value="50" oninput="updateSlider(2)">
+      <div style="text-align:center;margin-top:4px;font-size:0.82rem;color:var(--accent-cyan)" id="sliderVal2">50</div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text">你在群体中的存在感？</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>安静观察者 👀</span><span>焦点人物 🌟</span></div>
+      <input type="range" class="slider-track" id="slider3" min="0" max="100" value="50" oninput="updateSlider(3)">
+      <div style="text-align:center;margin-top:4px;font-size:0.82rem;color:var(--accent-cyan)" id="sliderVal3">50</div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text">你的理想社交频率？</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>偶尔小聚 🏠</span><span>天天约局 🎉</span></div>
+      <input type="range" class="slider-track" id="slider4" min="0" max="100" value="50" oninput="updateSlider(4)">
+      <div style="text-align:center;margin-top:4px;font-size:0.82rem;color:var(--accent-cyan)" id="sliderVal4">50</div>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="submitBtn" onclick="calculateResults()">📊 生成我的性格报告</button>
+</div>
+
+<!-- PAGE 3: Results -->
+<div id="result" class="page">
+  <div id="resultContent"></div>
+</div>
+
+</div>
+
+<script>
+const answers = {};
+const totalQuestions = 24;
+
+function startQuiz() {
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function selectOption(el, qNum, val) {
+  const card = el.closest('.question-card');
+  card.querySelectorAll('.option-item').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[qNum] = val;
+  const answered = Object.keys(answers).length;
+  document.getElementById('progressText').textContent = `${answered} / ${totalQuestions}`;
+  document.getElementById('progressFill').style.width = `${(answered/totalQuestions)*100}%`;
+}
+
+function updateSlider(n) {
+  const v = document.getElementById('slider'+n).value;
+  document.getElementById('sliderVal'+n).textContent = v;
+}
+
+// MBTI type data
+const mbtiData = {
+  INTJ:{name:"策略家",emoji:"♟️",desc:"独立而富有远见的战略思考者。你以深邃的洞察力和坚定的逻辑构建宏大蓝图，不轻易被外界左右。内心世界丰富而有序，追求效率与深度。",careers:["战略规划师","科研工作者","系统架构师","投资分析师"],tips:"试着多倾听他人感受，完美主义有时需要适度放下。",best:["ENFP","ENTP"],good:["INFJ","INFP"]},
+  INTP:{name:"逻辑学家",emoji:"🔬",desc:"好奇心驱动的理论探索者。你沉浸在思维的海洋中，热爱拆解问题、构建理论模型。对知识的渴望永无止境，享受智力挑战带来的快感。",careers:["数据科学家","程序员","哲学研究者","数学家"],tips:"想法需要落地才有价值，试着给创意一个执行的时间表。",best:["ENTJ","ESTJ"],good:["INTJ","INFJ"]},
+  ENTJ:{name:"指挥官",emoji:"👑",desc:"天生的领导者和组织者。你果断高效，善于整合资源推动目标达成。面对挑战时越挫越勇，具有强烈的掌控欲和战略眼光。",careers:["企业高管","创业者","项目经理","律师"],tips:"放慢脚步倾听团队声音，领导力不只是推进还有激励。",best:["INTP","INFP"],good:["ENTP","ENFJ"]},
+  ENTP:{name:"辩论家",emoji:"🎭",desc:"机敏多变的创意发起者。你享受思想的交锋，善于从不同角度看问题。讨厌墨守成规，永远在寻找更好的可能性。",careers:["产品经理","咨询师","记者","风险投资人"],tips:"专注力是你的超能力，学会在深度和广度之间切换。",best:["INTJ","INFJ"],good:["ENTJ","ENFP"]},
+  INFJ:{name:"提倡者",emoji:"🕊️",desc:"理想主义的引路人。你拥有深刻的洞察力和强烈的使命感，总是能看到事物背后更深层意义。安静却有力，致力于让世界变得更好。",careers:["心理咨询师","作家","公益组织创始人","UX设计师"],tips:"别把全世界的问题都扛在肩上，先照顾好自己。",best:["ENTP","ENFP"],good:["INTJ","INFP"]},
+  INFP:{name:"调停者",emoji:"🌈",desc:"温柔的理想主义者。你拥有丰富的内心世界和坚定的价值观，在喧嚣中守护着内心的诗意。对美和意义有着近乎执着的追求。",careers:["创意写作","艺术治疗师","社工","独立设计师"],tips:"理想需要行动支撑，迈出第一步比想完美方案更重要。",best:["ENTJ","ENFJ"],good:["INFJ","INTP"]},
+  ENFJ:{name:"主人公",emoji:"🌟",desc:"热情洋溢的灵感传递者。你天生善于激励他人，用温暖和远见凝聚团队。关注每个人的成长，是值得信赖的伙伴和领袖。",careers:["培训师","人力资源总监","社会企业家","教师"],tips:"帮助别人时别忘了自己的需求，不是所有问题都需要你来解决。",best:["INTP","INFP"],good:["ENFP","ENTJ"]},
+  ENFP:{name:"竞选者",emoji:"🎪",desc:"自由奔放的创意探索者。你充满热情和想象力，善于发现人与事之间的联系。生命对你来说是一场不断展开的冒险。",careers:["创意总监","活动策划","品牌策略师","自由职业者"],tips:"你的热情需要可持续的节奏，学会对不重要的事说不。",best:["INTJ","INFJ"],good:["ENTP","ENFJ"]},
+  ISTJ:{name:"物流师",emoji:"📋",desc:"可靠务实秩序的守护者。你以责任感和条理性著称，言出必行、一丝不苟。是团队中最稳定可靠的存在。",careers:["审计师","项目管理","法律合规","工程师"],tips:"偶尔允许计划外的惊喜，灵活不是对秩序的背叛。",best:["ESFP","ESTP"],good:["ISFJ","ISTP"]},
+  ISFJ:{name:"守卫者",emoji:"🛡️",desc:"温暖而可靠的守护者。你默默付出、体贴入微，用行动而非言语表达关爱。对家人朋友有着无条件的忠诚和支持。",careers:["护士","行政管理","教师","社工"],tips:"你的需求同样重要，学会表达自己的想法和边界。",best:["ESFP","ESTP"],good:["ISTJ","ISFP"]},
+  ESTJ:{name:"总经理",emoji:"💼",desc:"高效务实的执行者。你组织力强、目标明确，善于把计划变为现实。重视传统和秩序，是推动事情落地的中坚力量。",careers:["运营总监","军事指挥","法官","银行家"],tips:"效率之外还有人，偶尔放慢脚步感受过程的温度。",best:["ISFP","ISTP"],good:["ESTJ","ESFJ"]},
+  ESFJ:{name:"执政官",emoji:"🤝",desc:"热忱体贴的社交纽带。你天生善于营造和谐氛围，关心身边每个人的需求。是朋友圈中温暖的存在，乐于助人。",careers:["人力资源","客户关系","医护人员","社区管理"],tips:"不必让每个人都满意，学会在付出的同时也接受帮助。",best:["ISFP","ISTP"],good:["ESFJ","ESTJ"]},
+  ISTP:{name:"鉴赏家",emoji:"🔧",desc:"冷静灵活的实践者。你善于观察分析，动手能力极强。面对突发状况时沉着冷静，享受拆解和重建的过程。",careers:["机械工程师","外科医生","消防员","赛车手"],tips:"试着分享你的内心感受，亲密关系需要更多的表达。",best:["ESFJ","ESTJ"],good:["ISTJ","ISFP"]},
+  ISFP:{name:"探险家",emoji:"🎨",desc:"安静而敏感的自由灵魂。你活在当下，对美有着天然的感知力。温和外表下藏着坚定的个人立场和独特审美。",careers:["设计师","摄影师","花艺师","音乐家"],tips:"你的天赋值得被更多人看到，别害怕展示真实的自己。",best:["ESTJ","ESFJ"],good:["ISFJ","ISTP"]},
+  ESTP:{name:"企业家",emoji:"🚀",desc:"大胆果敢的行动派。你享受当下的刺激，善于在危机中发现机会。快速决策、即刻行动是你的标签。",careers:["销售总监","运动员","急救人员","企业家"],tips:"偶尔慢下来思考长期后果，不是所有风险都值得冒。",best:["ISFJ","ISTJ"],good:["ESTJ","ESFP"]},
+  ESFP:{name:"表演者",emoji:"🎉",desc:"热情洋溢的生活艺术家。你天生自带聚光灯，用乐观和活力感染身边的每个人。活在当下、享受生活是你的哲学。",careers:["演员","活动策划","旅行博主","美食家"],tips:"享受当下很棒，但也为未来留些准备。",best:["ISTJ","ISFJ"],good:["ESTP","ESFJ"]}
+};
+
+function calculateResults() {
+  const answered = Object.keys(answers).length;
+  if (answered < 20) {
+    alert('请至少完成前20道选择题哦～');
+    return;
+  }
+
+  // Calculate MBTI dimensions
+  let eScore=0, sScore=0, tScore=0, jScore=0;
+  // E/I: questions 1-5
+  for(let i=1;i<=5;i++){
+    if(answers[i]==='A') eScore+=2;
+    else if(answers[i]==='B') eScore-=2;
+    else eScore+=0;
+  }
+  // S/N: questions 6-10
+  for(let i=6;i<=10;i++){
+    if(answers[i]==='A') sScore+=2;
+    else if(answers[i]==='B') sScore-=2;
+    else sScore+=0;
+  }
+  // T/F: questions 11-15
+  for(let i=11;i<=15;i++){
+    if(answers[i]==='A') tScore+=2;
+    else if(answers[i]==='B') tScore-=2;
+    else tScore+=0;
+  }
+  // J/P: questions 16-20
+  for(let i=16;i<=20;i++){
+    if(answers[i]==='A') jScore+=2;
+    else if(answers[i]==='B') jScore-=2;
+    else jScore+=0;
+  }
+
+  const ePct = Math.round(50 + (eScore/10)*50);
+  const sPct = Math.round(50 + (sScore/10)*50);
+  const tPct = Math.round(50 + (tScore/10)*50);
+  const jPct = Math.round(50 + (jScore/10)*50);
+
+  const type = (ePct>=50?'E':'I') + (sPct>=50?'S':'N') + (tPct>=50?'T':'F') + (jPct>=50?'J':'P');
+
+  // Big Five from questions 21-24 + MBTI correlations
+  let openness=50, conscientiousness=50, extraversion=50, agreeableness=50, neuroticism=50;
+
+  // Openness: S/N inverted + q24
+  openness = Math.round(100 - sPct*0.6 + (answers[24]==='B'?20:answers[24]==='C'?10:0));
+  // Conscientiousness: J/P + q17
+  conscientiousness = Math.round(jPct*0.6 + (answers[17]==='A'?20:answers[17]==='C'?10:0));
+  // Extraversion: E/I + sliders
+  const sliderAvg = (parseInt(document.getElementById('slider2').value) + parseInt(document.getElementById('slider3').value) + parseInt(document.getElementById('slider4').value)) / 3;
+  extraversion = Math.round(ePct*0.4 + sliderAvg*0.6);
+  // Agreeableness: T/F inverted + q23
+  agreeableness = Math.round((100-tPct)*0.5 + (answers[23]==='A'?25:answers[23]==='C'?12:0) + (answers[12]==='B'?15:answers[12]==='C'?7:0));
+  // Neuroticism: q22 + slider1 inverted
+  neuroticism = Math.round((100-parseInt(document.getElementById('slider1').value))*0.4 + (answers[22]==='A'?30:answers[22]==='C'?15:0));
+
+  // Clamp
+  [openness,conscientiousness,extraversion,agreeableness,neuroticism].forEach((v,i,a)=>{a[i]=Math.max(10,Math.min(95,a[i]))});
+
+  // Social energy
+  const socialEnergy = Math.round(extraversion * 0.5 + ePct * 0.3 + sliderAvg * 0.2);
+
+  const data = mbtiData[type];
+  if(!data) return;
+
+  // Render result
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('result').classList.add('active');
+  window.scrollTo(0,0);
+
+  const rc = document.getElementById('resultContent');
+  rc.innerHTML = `
+    <div class="result-hero">
+      <div class="result-badge" style="background:var(--bg-card)">${data.emoji}</div>
+      <div class="result-type">${type}</div>
+      <div class="result-title">${data.name}</div>
+      <div class="result-desc">${data.desc}</div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">📐 四维光谱分析</div>
+      <div class="dimension-bar-group">
+        ${renderDimension('E 外向','I 内向',ePct,'var(--accent-cyan)','var(--accent-blue)')}
+        ${renderDimension('S 感觉','N 直觉',sPct,'var(--accent-purple)','var(--accent-pink)')}
+        ${renderDimension('T 思考','F 情感',tPct,'var(--accent-orange)','var(--accent-pink)')}
+        ${renderDimension('J 判断','P 感知',jPct,'var(--accent-green)','var(--accent-cyan)')}
+      </div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">🕸️ 性格雷达图</div>
+      <div class="radar-container"><canvas id="radarCanvas" width="380" height="380"></canvas></div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">🧬 大五人格特质</div>
+      ${renderBig5('开放性 Openness',openness,'渴望新体验、富有想象力','好奇心、创造力、审美','var(--accent-purple)')}
+      ${renderBig5('尽责性 Conscientiousness',conscientiousness,'自律有序、目标导向','条理性、责任感、自律','var(--accent-blue)')}
+      ${renderBig5('外向性 Extraversion',extraversion,'热情社交、活力充沛','社交性、活跃度、正情绪','var(--accent-cyan)')}
+      ${renderBig5('宜人性 Agreeableness',agreeableness,'信任合作、利他友善','同理心、合作性、利他','var(--accent-green)')}
+      ${renderBig5('神经质 Neuroticism',neuroticism,'情绪敏感、容易波动','焦虑、抑郁、冲动','var(--accent-pink)')}
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">⚡ 社交能量仪表</div>
+      <div class="social-gauge">
+        <div class="gauge-container">
+          <canvas id="gaugeCanvas" width="220" height="130"></canvas>
+        </div>
+        <div class="gauge-label" style="color:${socialEnergy>=55?'var(--accent-cyan)':'var(--accent-purple)'}">
+          ${socialEnergy>=70?'高能社交者 🌟':socialEnergy>=55?'社交灵活者 🔄':socialEnergy>=40?'适度社交者 ⚖️':socialEnergy>=25?'选择性社交者 🏠':'深度独处者 🧘'}
+        </div>
+        <div class="gauge-desc">社交能量值: ${socialEnergy}/100</div>
+        <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:12px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.7">
+          ${socialEnergy>=55
+            ?'你在社交中获取能量，与人互动让你思维活跃、精神饱满。注意给自己留出独处恢复的时间。'
+            :'独处是你的充电方式，深度的一对一交流比群体活动更适合你。社交后记得给自己留恢复空间。'}
+        </p>
+      </div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">💼 适合的职业方向</div>
+      <div class="career-grid">
+        ${data.careers.map((c,i)=>`<div class="career-item"><span class="emoji">${['🎯','🔬','💡','🚀'][i]||'✨'}</span>${c}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">💞 人际兼容性</div>
+      <div class="compat-grid">
+        <div class="compat-card">
+          <div class="compat-label">灵魂搭档</div>
+          <div class="compat-type">${data.best.join(' / ')}</div>
+          <div class="compat-hearts">💕💕💕💕💕</div>
+        </div>
+        <div class="compat-card">
+          <div class="compat-label">默契伙伴</div>
+          <div class="compat-type">${data.good.join(' / ')}</div>
+          <div class="compat-hearts">💛💛💛💛</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dimension-section">
+      <div class="section-title">🌱 成长建议</div>
+      <div class="tip-card">
+        <strong>💡 核心提醒：</strong>${data.tips}
+      </div>
+      <div class="tip-card">
+        <strong>🔄 盲区觉察：</strong>${type[0]==='I'?'你的内心世界很丰富，但外界未必看得到——试着主动表达，让别人理解你。':'你的社交能量很强，但注意不要忽略独处时的自我对话——深度反思能让你更有智慧。'}
+      </div>
+      <div class="tip-card">
+        <strong>🚀 行动建议：</strong>找一个和你类型互补的朋友，每月一次深度对话——不同视角的碰撞是最好的成长催化剂。
+      </div>
+    </div>
+
+    <button class="btn-restart" onclick="location.reload()">🔄 重新测试</button>
+  `;
+
+  // Animate dimension bars
+  setTimeout(()=>{
+    document.querySelectorAll('.dim-fill').forEach(el=>{
+      el.style.width = el.dataset.width;
+    });
+    document.querySelectorAll('.big5-fill').forEach(el=>{
+      el.style.width = el.dataset.width;
+    });
+  },100);
+
+  // Draw radar chart
+  setTimeout(()=>drawRadar([openness,conscientiousness,extraversion,agreeableness,neuroticism]),200);
+
+  // Draw gauge
+  setTimeout(()=>drawGauge(socialEnergy),300);
+}
+
+function renderDimension(leftLabel,rightLabel,pct,colorL,colorR){
+  const leftActive = pct >= 50;
+  return `<div class="dimension-item">
+    <div class="dim-labels">
+      <span class="dim-label ${leftActive?'active':''}">${leftLabel}</span>
+      <span class="dim-label ${!leftActive?'active':''}">${rightLabel}</span>
+    </div>
+    <div class="dim-bar">
+      <div class="dim-fill" data-width="${pct}%" style="width:0%;background:${leftActive?colorL:colorR}"></div>
+    </div>
+    <div class="dim-percentage">${leftActive?pct:100-pct}% ${leftActive?leftLabel.split(' ')[0]:rightLabel.split(' ')[0]}</div>
+    <div class="dim-desc">${leftActive?'你更倾向于'+leftLabel.split(' ').slice(1).join(' ')+'的特质':'你更倾向于'+rightLabel.split(' ').slice(1).join(' ')+'的特质'}</div>
+  </div>`;
+}
+
+function renderBig5(name,score,desc,traits,color){
+  const traitArr = traits.split('、');
+  return `<div class="big5-card">
+    <div class="big5-header">
+      <span class="big5-name">${name}</span>
+      <span class="big5-score" style="color:${color}">${score}</span>
+    </div>
+    <div class="big5-bar"><div class="big5-fill" data-width="${score}%" style="width:0%;background:${color}"></div></div>
+    <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:8px">${desc}</div>
+    <div class="big5-traits">${traitArr.map(t=>`<span class="big5-trait">${t}</span>`).join('')}</div>
+  </div>`;
+}
+
+function drawRadar(values){
+  const canvas = document.getElementById('radarCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height;
+  const cx=w/2, cy=h/2, r=140;
+  const labels=['开放性','尽责性','外向性','宜人性','情绪稳定性'];
+  const n=5;
+
+  ctx.clearRect(0,0,w,h);
+
+  // Grid
+  for(let ring=1;ring<=5;ring++){
+    const rr=r*ring/5;
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const angle = (Math.PI*2*i/n) - Math.PI/2;
+      const x=cx+rr*Math.cos(angle), y=cy+rr*Math.sin(angle);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle='rgba(255,255,255,0.08)';
+    ctx.stroke();
+  }
+
+  // Axes
+  for(let i=0;i<n;i++){
+    const angle=(Math.PI*2*i/n)-Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+r*Math.cos(angle),cy+r*Math.sin(angle));
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
+    ctx.stroke();
+  }
+
+  // Data
+  const adjustedValues = values.map((v,i)=> i===4 ? 100-v : v); // invert neuroticism to emotional stability
+  ctx.beginPath();
+  adjustedValues.forEach((v,i)=>{
+    const angle=(Math.PI*2*i/n)-Math.PI/2;
+    const vr=r*v/100;
+    const x=cx+vr*Math.cos(angle), y=cy+vr*Math.sin(angle);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(139,92,246,0.15)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(139,92,246,0.8)';
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // Dots and labels
+  adjustedValues.forEach((v,i)=>{
+    const angle=(Math.PI*2*i/n)-Math.PI/2;
+    const vr=r*v/100;
+    const x=cx+vr*Math.cos(angle), y=cy+vr*Math.sin(angle);
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='#8b5cf6';ctx.fill();
+
+    // Label
+    const lx=cx+(r+25)*Math.cos(angle), ly=cy+(r+25)*Math.sin(angle);
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.font='12px "Noto Sans SC"';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(labels[i],lx,ly);
+  });
+}
+
+function drawGauge(value){
+  const canvas=document.getElementById('gaugeCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  const cx=w/2,cy=h-10,radius=90;
+
+  ctx.clearRect(0,0,w,h);
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius,Math.PI,0);
+  ctx.lineWidth=16;
+  ctx.strokeStyle='rgba(255,255,255,0.06)';
+  ctx.lineCap='round';
+  ctx.stroke();
+
+  // Value arc
+  const angle=Math.PI+(value/100)*Math.PI;
+  const gradient=ctx.createLinearGradient(cx-radius,cy,cx+radius,cy);
+  gradient.addColorStop(0,'#8b5cf6');
+  gradient.addColorStop(0.5,'#3b82f6');
+  gradient.addColorStop(1,'#06b6d4');
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius,Math.PI,angle);
+  ctx.lineWidth=16;
+  ctx.strokeStyle=gradient;
+  ctx.lineCap='round';
+  ctx.stroke();
+
+  // Value text
+  ctx.fillStyle='var(--text-primary)';
+  ctx.font='bold 28px "Noto Sans SC"';
+  ctx.textAlign='center';
+  ctx.fillText(value,cx,cy-20);
+}
+</script>
+</body>
+</html>
